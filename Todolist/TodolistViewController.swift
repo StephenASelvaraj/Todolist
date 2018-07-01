@@ -51,7 +51,7 @@ class TodolistViewController: UITableViewController {
 
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
-        var textField = UIT extField()
+        var textField = UITextField()
         
         let alert = UIAlertController(title: "Add New To Do list", message: "", preferredStyle: .alert)
         
@@ -61,6 +61,7 @@ class TodolistViewController: UITableViewController {
             self.itemArray.append(textField.text!)
         
             self.tableView.reloadData()
+            
         }
         
         alert.addTextField { (alertTextField) in
