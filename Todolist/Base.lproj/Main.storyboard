@@ -32,7 +32,18 @@
                             <outlet property="delegate" destination="6FA-Hh-h3F" id="979-Z9-nyd"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="To Do List" id="F9v-2Z-azj"/>
+                    <toolbarItems>
+                        <barButtonItem title="Item" id="c4x-D8-03Z"/>
+                    </toolbarItems>
+                    <navigationItem key="navigationItem" title="To Do List" id="F9v-2Z-azj">
+                        <barButtonItem key="rightBarButtonItem" title="+" id="7UF-YQ-L1Z">
+                            <color key="tintColor" cocoaTouchSystemColor="darkTextColor"/>
+                            <connections>
+                                <action selector="addButtonPressed:" destination="6FA-Hh-h3F" id="sbh-mF-BXh"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6gm-rL-zfb" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
