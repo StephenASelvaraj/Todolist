@@ -7,24 +7,21 @@
 //
 
 import UIKit
+import CoreData
 
 class TodolistViewController: UITableViewController {
 
     var itemArray = [Item]()
     
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
-
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         loadItems()
-        print(dataFilePath!)
         
-//        if let items = UserDefaults.standard.array(forKey: "TodolistArray") as? [Item] {
-//            itemArray = items
-//        }
-        
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+
     }
 
     override func didReceiveMemoryWarning() {
@@ -47,8 +44,7 @@ class TodolistViewController: UITableViewController {
         cell.textLabel?.text = item.title
         
         cell.accessoryType = item.done ? .checkmark : .none
-        
-        
+  
         return cell
         
     }
@@ -56,7 +52,11 @@ class TodolistViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print (itemArray[indexPath.row])
       
-        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        // Next 2 lines of commented code is for D of CRUD operation code for Coredata.
+        //context.delete(itemArray[indexPath.row])
+        //itemArray.remove(at: indexPath.row)
+        
+       // itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
         saveItems()
      
@@ -73,15 +73,13 @@ class TodolistViewController: UITableViewController {
 
             print(textField.text!)
             
-            let newItem = Item()
+            let newItem = Item(context: self.context)
+            // Both title and done property within entity is not optional
             newItem.title = textField.text!
-            
+            newItem.done = false
             self.itemArray.append(newItem)
-            
- 
+     
             self.saveItems()
-
-            
         }
         
         alert.addTextField { (alertTextField) in
@@ -95,32 +93,28 @@ class TodolistViewController: UITableViewController {
     }
     
     func saveItems () {
-        
-        let encoder = PropertyListEncoder()
-        
-        do {
-            let data = try encoder.encode(itemArray)
-            try data.write(to: dataFilePath!)
+      do {
+            // context.save is used for all CRUD operation except read
+           try context.save()
         } catch {
             print("Error encoding data")
         }
-        
         tableView.reloadData()
     }
     
     
     func loadItems () {
+
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
         
-            if let data = try? Data(contentsOf: dataFilePath!) {
-                let decoder = PropertyListDecoder()
-                do{
-                    itemArray = try decoder.decode([Item].self, from: data)
- 
-                } catch {
-                 print("Error decoding values")
-                }
+        do{
+            itemArray = try context.fetch(request)
+
+            } catch {
+                 print("Error fetching data from sqllite ")
             }
     }
+ 
     
   
     
