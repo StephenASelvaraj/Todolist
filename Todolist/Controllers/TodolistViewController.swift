@@ -18,6 +18,7 @@ class TodolistViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+  
         loadItems()
         
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
@@ -103,20 +104,50 @@ class TodolistViewController: UITableViewController {
     }
     
     
-    func loadItems () {
+    func loadItems (with request: NSFetchRequest<Item> = Item.fetchRequest())   {
 
-        let request : NSFetchRequest<Item> = Item.fetchRequest()
+       // let request : NSFetchRequest<Item> = Item.fetchRequest()
         
         do{
             itemArray = try context.fetch(request)
-
+            
             } catch {
                  print("Error fetching data from sqllite ")
             }
+        tableView.reloadData()
     }
  
     
   
+    }
+
+extension TodolistViewController : UISearchBarDelegate {
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+    
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        
+        print(searchBar.text!)
+        
+        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        
+        loadItems(with: request)
+        
+        //tableView.reloadData()
+        
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadItems()
+            
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+        }
+    }
     
 }
 
