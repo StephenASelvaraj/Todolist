@@ -12,33 +12,28 @@ import RealmSwift
 
 class CategoryViewController: UITableViewController {
     
-    var categoryArray = [Category]()
+    var categories : Results<Category>?
     
-
+    let realm = try! Realm()
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-        
         loadCategory()
-        
-        
-        
+     
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categoryArray.count
+        // ?? - Nil coalsecing operator
+        return categories?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    
         let catCell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-        
-        let category = categoryArray[indexPath.row]
-        
-        catCell.textLabel?.text = category.name
+    
+        catCell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Found"
         
         return catCell
     }
@@ -54,7 +49,7 @@ class CategoryViewController: UITableViewController {
         
         if let indexpath = tableView.indexPathForSelectedRow {
             
-            itemsVC.selectedCategory = categoryArray[indexpath.row]
+            itemsVC.selectedCategory = categories?[indexpath.row]
     
         }
     }
@@ -69,13 +64,13 @@ class CategoryViewController: UITableViewController {
             
             print(textCatField.text!)
             
-            let newCategory = Category(context: self.context)
+            let newCategory = Category()
             // Both title and done property within entity is not optional
             newCategory.name = textCatField.text!
             
-            self.categoryArray.append(newCategory)
+            //self.categoryArray.append(newCategory)
             
-            self.saveCategory()
+            self.save(category: newCategory)
         }
         
         alert.addTextField { (alertTextField) in
@@ -89,26 +84,22 @@ class CategoryViewController: UITableViewController {
         
     }
     
-    func saveCategory () {
+    func save(category : Category) {
         do {
             // context.save is used for all CRUD operation except read
-            try context.save()
+            try realm.write {
+                realm.add(category)
+                }
         } catch {
             print("Error encoding data")
         }
         tableView.reloadData()
     }
     
-    func loadCategory (with request: NSFetchRequest<Category> = Category.fetchRequest())   {
+    func loadCategory ()   {
         
-        // let request : NSFetchRequest<Item> = Item.fetchRequest()
-        
-        do{
-            categoryArray = try context.fetch(request)
-            
-        } catch {
-            print("Error fetching data from sqllite ")
-        }
+        categories = realm.objects(Category.self)
+
         tableView.reloadData()
     }
     
