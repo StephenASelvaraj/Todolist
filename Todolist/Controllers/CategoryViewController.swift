@@ -9,6 +9,8 @@
 import UIKit
 import CoreData
 import RealmSwift
+import SwipeCellKit
+
 
 class CategoryViewController: UITableViewController {
     
@@ -31,9 +33,11 @@ class CategoryViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     
-        let catCell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        let catCell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! SwipeTableViewCell
     
         catCell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Found"
+        
+        catCell.delegate = self
         
         return catCell
     }
@@ -103,5 +107,34 @@ class CategoryViewController: UITableViewController {
         tableView.reloadData()
     }
     
+}
+
+extension CategoryViewController : SwipeTableViewCellDelegate {
+    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
+        guard orientation == .right else { return nil }
+        
+        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
+            // handle action by updating model with deletion
+            if let categoryForDeletion = self.categories?[indexPath.row] {
+                do {
+                    try self.realm.write {
+                        self.realm.delete(categoryForDeletion)
+                    }
+                
+                } catch {
+                    print("Error deleting category codes")
+                }
+            }
+            
+            tableView.reloadData()
+          
+        }
+        
+        // customize the action appearance
+        deleteAction.image = UIImage(named: "delete")
+        
+        return [deleteAction]
+    }
 }
 

@@ -61,6 +61,7 @@ class TodolistViewController: UITableViewController {
        
         if let item = itemsresults?[indexPath.row] {
             do {
+                //Updating records
                 try realm.write {
                     item.done = !item.done
                     // Uncomment next line to delete data from the realm database
